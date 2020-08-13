@@ -19,11 +19,11 @@ def train():
     while not Hidden():
         hide()
 
-while not Dead():
-    # Stealth - uncomment
+while not Dead():    
     train()
-
-    # Stealth - comment
     #hide()
-    
+       
+    #while not Hidden():
+    #    hide()    
+    #    Wait(100)
     Wait(100)

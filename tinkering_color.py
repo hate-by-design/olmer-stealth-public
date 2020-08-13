@@ -1,9 +1,9 @@
 from py_stealth import *
 from Scripts.types import Types
 from datetime import datetime as dt
-RESOURCE_REQUIRED = 18
-TOOLS_REQUIRED = 3
-BANK_BOX = 0x40319F30
+RESOURCE_REQUIRED = 12
+TOOLS_REQUIRED = 1
+BANK_BOX = 0x4018C655
 ORE = {
     1: {
         "text": "Iron",
@@ -32,7 +32,15 @@ ORE = {
     7: {
         "text": "Copper",
         "color": 0x0B83
-    }
+    },
+    8: {
+        "text": "Brute",
+        "color": 0x0474
+    },
+    9: {
+        "text": "Crimson",
+        "color": 0x0A11
+    },
 
 }
 
@@ -45,6 +53,7 @@ def get_ore_number(text: str) -> int:
 
 
 def make_tool(crafting_type, color, count, menu, submenu):
+    print (f"make_tool(crafting_type={crafting_type}, color={color}, count={count}, menu={menu}, submenu={submenu})")
     while CountEx(crafting_type, color, Backpack()) < count:
         if get_resource_from_bank(color, RESOURCE_REQUIRED):
             if MenuHookPresent():
@@ -52,6 +61,7 @@ def make_tool(crafting_type, color, count, menu, submenu):
 
             _started = dt.now()
             UseType(Types.TINKER_TOOLS, 0xFFFF)
+            Wait(200)
             WaitMenu("Tinkering", menu)
             WaitMenu(menu, submenu)
             WaitJournalLine(_started, "опыта|Заготовка", 10000)
@@ -70,23 +80,17 @@ def get_resource_from_bank(color: int, qty: int) -> bool:
             return True
     return False
 
-
-def craft_colored_tool(index, count):    
+def craft_colored_tool(index, count, menu, submenu_part, tool_type):
     for _current in range(1, index + 1):
         print(f"Current: {_current}")
-        _current_ore = ORE[_current]
-        print(f"make_tool(crafting_type={Types.PICKAXE}, color={_current_ore['color']}, count={count}, menu=Pickaxes, submenu={_current_ore['text']} Pickaxe)")
+        _current_ore = ORE[_current]        
         if _current == 1:
-            make_tool(Types.PICKAXE, _current_ore["color"],
-                      count, "Pickaxes", "Pickaxe")
+            make_tool(tool_type, _current_ore["color"],count, menu, submenu_part)
             Wait(500)
         else:
-            make_tool(Types.PICKAXE, _current_ore["color"],
-                    count, "Pickaxes", f"{_current_ore['text']} pickaxe")
+            make_tool(tool_type, _current_ore["color"],count, menu, f"{_current_ore['text']} {submenu_part}")
             Wait(500)
 
 
-for i in range(3):
-    print(i)
-#craft_colored_tool(3, TOOLS_REQUIRED)
 
+craft_colored_tool(9, 1, "Smith hammers", "smith hammer", Types.SMITHING_HAMMER)

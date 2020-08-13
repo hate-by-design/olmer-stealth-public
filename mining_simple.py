@@ -2,7 +2,7 @@ from py_stealth import *
 from Scripts.types import Types
 from datetime import datetime as dt
 import re
-
+import os
 
 # Changeable
 FORGE_COORDS = (5545, 1229)
@@ -12,6 +12,9 @@ BANK_COORDS = (5539, 1122)
 TOOLS_REQUIRED = 2
 # Index of required ore in ORE dict
 TOOL_INDEX = 9
+
+PROMETHEUS = 1
+FILE_NAME="mining"
 
 MINE_COORDS = [
     (5554, 1234),
@@ -206,7 +209,8 @@ def unload():
                 for _item in GetFoundList():
                     MoveItem(_item, 0, LastContainer(), 0, 0, 0)
                     Wait(500)
-
+        if PROMETHEUS == 1:
+            to_prometheus()
 
 
 def smelt():
@@ -218,6 +222,31 @@ def smelt():
                 UseType(Types.ORE, 0xFFFF)
                 WaitJournalLine(_started, "You smelt", 10000)
 
+
+def get_item_name(item_serial, message):
+    _started = dt.now()
+    ClickOnObject(item_serial)
+    Wait(500)
+    _journal_line = InJournalBetweenTimes(message, _started, dt.now())
+    if _journal_line > 0:        
+        _match = re.search(r"(\d+)\s(\S+)", Journal(_journal_line))
+        if _match:
+            return (_match.group(2), _match.group(1))
+
+    return ('error', 1)
+
+def to_prometheus():
+    # To empty file lulz    
+    open(f"{FILE_NAME}", 'w').close()
+    # Now we can append some data...
+    with open(FILE_NAME, "a") as _to_exporter:        
+        if FindType(Types.INGOT, LastContainer()):
+            for _ingot in GetFoundList():
+                _ingot, _qty = get_item_name(_ingot, "ingot")
+                if _ingot != "error":
+                    _to_exporter.write(f"{_ingot}={_qty}\n")
+
+        _to_exporter.close()
 
 def mine():
     for _tile_data in find_tiles(TILE_SEARCH_RANGE):
@@ -271,11 +300,13 @@ SetWarMode(False)
 SetMoveThroughNPC(20)
 
 
-while not Dead():
-    for point in MINE_COORDS:
-        point_x, point_y = point
-        move_to(point_x, point_y)        
-        mine()
+#while not Dead():
+#    for point in MINE_COORDS:
+#        point_x, point_y = point
+#        move_to(point_x, point_y)        
+#        mine()
+
+
 
 #smelt()
 #unload()
