@@ -300,11 +300,11 @@ SetWarMode(False)
 SetMoveThroughNPC(20)
 
 
-#while not Dead():
-#    for point in MINE_COORDS:
-#        point_x, point_y = point
-#        move_to(point_x, point_y)        
-#        mine()
+while not Dead():
+    for point in MINE_COORDS:
+        point_x, point_y = point
+        move_to(point_x, point_y)        
+        mine()
 
 
 
