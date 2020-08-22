@@ -24,7 +24,7 @@ MINE_COORDS = [
 
 BANK_BOX = 0x40319F30
 TILE_SEARCH_RANGE = 12
-# 
+#
 
 ORE = {
     1: {
@@ -103,15 +103,15 @@ def drop_ore(index):
         Wait(500)
 
 
-def find_tiles(radius) -> list:    
-    _tiles_coordinates = []    
+def find_tiles(radius) -> list:
+    _tiles_coordinates = []
     for _tile in MINEABLE_TILES:
         _tiles_coordinates += GetLandTilesArray(GetX(Self()) - radius, GetY(Self()) - radius, GetX(Self()) + radius,
                                  GetY(Self()) + radius, WorldNum(), _tile)
-                                 
+
         _tiles_coordinates += GetStaticTilesArray(GetX(Self()) - radius, GetY(Self()) - radius, GetX(Self()) + radius,
                                      GetY(Self()) + radius, WorldNum(), _tile)
-                                     
+
     print("[FindTiles] Found "+str(len(_tiles_coordinates))+" tiles")
     return _tiles_coordinates
 
@@ -156,7 +156,7 @@ def get_resource_from_bank(color: int, qty: int) -> bool:
     return False
 
 
-def craft_colored_tool(index, count):    
+def craft_colored_tool(index, count):
     for _current in range(1, index + 1):
         _current_ore = ORE[_current]
         print(f"make_tool(crafting_type={Types.PICKAXE}, color={_current_ore['color']}, count={count}, menu=Pickaxes, submenu={_current_ore['text']} Pickaxe)")
@@ -169,13 +169,13 @@ def craft_colored_tool(index, count):
                 Types.PICKAXE, _current_ore["color"], count, "Pickaxes", f"{_current_ore['text']} pickaxe")
             Wait(500)
 
-    
+
 
 def equip_tool() -> bool:
     if tool_available():
         _right_hand = ObjAtLayer(RhandLayer())
         if _right_hand > 0:
-            if GetType(_right_hand) != Types.PICKAXE:            
+            if GetType(_right_hand) != Types.PICKAXE:
                 UnEquip(RhandLayer())
                 Wait(500)
                 UseType(Types.PICKAXE, 0xFFFF)
@@ -189,18 +189,18 @@ def equip_tool() -> bool:
 
 
 def move_to(x: int, y: int) -> bool:
-    _try = 0    
+    _try = 0
     while GetX(Self()) != x or GetY(Self()) != y:
         newMoveXY(x, y, True, 0, True)
         _try += 1
         if _try > 10:
             print(f"[move_to] Can't reach X: {x} Y: {y}")
-            return False            
+            return False
     return True
 
 
 def unload():
-    _bank_x, _bank_y = BANK_COORDS    
+    _bank_x, _bank_y = BANK_COORDS
     if move_to(_bank_x, _bank_y):
         UseObject(BANK_BOX)
         Wait(500)
@@ -228,7 +228,7 @@ def get_item_name(item_serial, message):
     ClickOnObject(item_serial)
     Wait(500)
     _journal_line = InJournalBetweenTimes(message, _started, dt.now())
-    if _journal_line > 0:        
+    if _journal_line > 0:
         _match = re.search(r"(\d+)\s(\S+)", Journal(_journal_line))
         if _match:
             return (_match.group(2), _match.group(1))
@@ -236,10 +236,10 @@ def get_item_name(item_serial, message):
     return ('error', 1)
 
 def to_prometheus():
-    # To empty file lulz    
+    # To empty file lulz
     open(f"{FILE_NAME}", 'w').close()
     # Now we can append some data...
-    with open(FILE_NAME, "a") as _to_exporter:        
+    with open(FILE_NAME, "a") as _to_exporter:
         if FindType(Types.INGOT, LastContainer()):
             for _ingot in GetFoundList():
                 _ingot, _qty = get_item_name(_ingot, "ingot")
@@ -251,11 +251,11 @@ def to_prometheus():
 def mine():
     for _tile_data in find_tiles(TILE_SEARCH_RANGE):
         _tile, _x, _y, _z = _tile_data
-        while not Dead():            
+        while not Dead():
             if Weight() >= MaxWeight() - 20:
                 smelt()
-                
-                if Weight() >= MaxWeight() - 50:                                        
+
+                if Weight() >= MaxWeight() - 50:
                     unload()
                     make_colored_tool(Types.TINKER_TOOLS, 0x0000, 2, "Tools", "Tinker")
 
@@ -263,7 +263,7 @@ def mine():
                     _tools_count = CountEx(Types.PICKAXE, ORE[TOOL_INDEX]["color"], Backpack())
                     if _tools_count < TOOLS_REQUIRED:
                         craft_colored_tool(TOOL_INDEX, TOOLS_REQUIRED - _tools_count)
-                    # 
+                    #
 
                     _mine_x, _mine_y = MINE_COORDS[0]
                     move_to(_mine_x, _mine_y)
@@ -272,8 +272,8 @@ def mine():
                 if GetX(Self()) == _x and GetY(Self()) == _y:
                     newMoveXY(_x + 1, _y, True, 0, True)
 
-                equip_tool()                
-                cancel_targets()                                
+                equip_tool()
+                cancel_targets()
 
                 _started = dt.now()
                 UseObject(ObjAtLayer(RhandLayer()))
@@ -303,12 +303,10 @@ SetMoveThroughNPC(20)
 while not Dead():
     for point in MINE_COORDS:
         point_x, point_y = point
-        move_to(point_x, point_y)        
+        move_to(point_x, point_y)
         mine()
 
 
 
 #smelt()
 #unload()
-
-

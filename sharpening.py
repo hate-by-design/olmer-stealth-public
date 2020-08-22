@@ -17,13 +17,13 @@ def sharp(target: int):
     cancel_targets()
     UseType(0x241C, 0xFFFF)
     if WaitForTarget(1000):
-        WaitTargetObject(target)        
+        WaitTargetObject(target)
         WaitJournalLine(_started, "Неудачная|атака", 5000)
         Wait(100)
 
 
 
-def item_attack_power(item_serial: int) -> int:        
+def item_attack_power(item_serial: int) -> int:
     _started = dt.now()
     ClickOnObject(item_serial)
     Wait(500)
@@ -33,7 +33,7 @@ def item_attack_power(item_serial: int) -> int:
         if _match:
             print(_match.group(1))
             return int(_match.group(1))
-    print("!!! Fail to get current attack, returning 1000 to break loop")
+    print("!!! Failed to get current attack, returning 1000 to break loop")
     return 1000
 
 def spheres_available() -> bool:

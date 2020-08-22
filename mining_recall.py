@@ -29,7 +29,7 @@ MINE_RUNE = 7
 CHEST = 0x40317177
 TILE_SEARCH_RANGE = 20
 BAD_TILES = []
-# 
+#
 PHRASES = [
     "Как Вас жизнь разбросала-то. Отдельно вкус, отдельно ум, отдельно красота.",
     "Да, Вы, я смотрю мастер спорта по традиционному русскому единоборству — борьбе с похмельным синдромом..",
@@ -38,7 +38,7 @@ PHRASES = [
     "Я никогда еще не видел столько грязи в таких красивых шелковых чулках!",
     "Да, я вижу, Вас постоянно преследуют умные мысли. Но Вы всегда оказываетесь быстрее!",
     "Таких как Вы, на самом деле, на свете очень мало. Но расставлены они так грамотно, что постоянно натыкаешься на дурака или идиота.",
-    "Чтоб оно вам поперек горла встало, когда по-большому пойдете."    
+    "Чтоб оно вам поперек горла встало, когда по-большому пойдете."
 ]
 LOOT = [0x19B7, 0x19B8, 0x19BA, Types.GOLD_COIN,
         Types.ORE, 0x0F8E, 0x0E35, 0x0FEF]
@@ -72,7 +72,7 @@ def handle_attack(text: str, sender_name: str, sender_id: int):
         discord_message(f"{sender_name} атакует меня в локации **>>{DISCORD_ALERT_LOCATION}<<**")
         UOSay(random.choice(PHRASES))
 
-# Death handler, waiting to ressurrect        
+# Death handler, waiting to ressurrect
 def handle_death(dead: bool):
     if dead:
         discord_message("Я сдох :(")
@@ -119,9 +119,9 @@ def repair():
     if ObjAtLayer(LhandLayer()) > 0:
         UnEquip(LhandLayer())
 
-    if FindType(Types.PICKAXE, Backpack()):        
-        _to_repair = GetFindedList()        
-        
+    if FindType(Types.PICKAXE, Backpack()):
+        _to_repair = GetFindedList()
+
         if FindType(Types.SMITHING_HAMMER, Backpack()):
             _try = 0
             while ObjAtLayer(RhandLayer()) != FindItem():
@@ -155,15 +155,15 @@ def full_disconnect():
     SetARStatus(False)
     Disconnect()
 
-def find_tiles(radius) -> list:    
-    _tiles_coordinates = []    
+def find_tiles(radius) -> list:
+    _tiles_coordinates = []
     for _tile in MINEABLE_TILES:
         _tiles_coordinates += GetLandTilesArray(GetX(Self()) - radius, GetY(Self()) - radius, GetX(Self()) + radius,
                                  GetY(Self()) + radius, WorldNum(), _tile)
-                                 
+
         _tiles_coordinates += GetStaticTilesArray(GetX(Self()) - radius, GetY(Self()) - radius, GetX(Self()) + radius,
                                      GetY(Self()) + radius, WorldNum(), _tile)
-                                     
+
     print("[FindTiles] Found "+str(len(_tiles_coordinates))+" tiles")
     return _tiles_coordinates
 
@@ -175,7 +175,7 @@ def pickaxe_in_hand() -> bool:
             return True
     return False
 
-def tool_available() -> bool:    
+def tool_available() -> bool:
     if FindType(Types.PICKAXE, Backpack()) or pickaxe_in_hand():
         return True
     return False
@@ -205,13 +205,13 @@ def equip_tool() -> bool:
 
 
 def move_to(x: int, y: int) -> bool:
-    _try = 0    
+    _try = 0
     while GetX(Self()) != x or GetY(Self()) != y:
         newMoveXY(x, y, True, 0, True)
         _try += 1
         if _try > 10:
             print(f"[move_to] Can't reach X: {x} Y: {y}")
-            return False            
+            return False
     return True
 
 
@@ -237,7 +237,7 @@ def kill_elemental(elemental: int):
     while GetHP(elemental) > 0:
         newMoveXY(GetX(elemental), GetY(elemental), True, 1, True)
         Attack(elemental)
-        Wait(500)        
+        Wait(500)
 
 def restock():
     if Count(Types.PICKAXE) < KEEP_TOOLS:
@@ -261,19 +261,19 @@ def get_bandages():
     if FindType(Types.BANDAGES, CHEST):
         if FindQuantity() > KEEP_BANDAGES:
             Grab(FindItem(), KEEP_BANDAGES)
-            Wait(500)            
+            Wait(500)
 
 def unload():
     _try = 0
     while LastContainer() != CHEST:
-        UseObject(CHEST)        
+        UseObject(CHEST)
         Wait(500)
         _try += 1
         if _try > 10:
             print("Failed to open chest")
             break
 
-    
+
     if not restock():
         print("No more tools left in chest!")
         full_disconnect()
@@ -295,7 +295,7 @@ def unload():
             for _loot_item in GetFoundList():
                 MoveItem(_loot_item, 0, CHEST, 0, 0, 0)
                 Wait(500)
-            
+
     recall(MINE_RUNE)
     UseObject(Backpack())
     Wait(500)
@@ -323,7 +323,7 @@ def get_item_name(item_serial, message):
     ClickOnObject(item_serial)
     Wait(500)
     _journal_line = InJournalBetweenTimes(message, _started, dt.now())
-    if _journal_line > 0:        
+    if _journal_line > 0:
         _match = re.search(r"(\d+)\s(\S+)", Journal(_journal_line))
         if _match:
             return (_match.group(2), _match.group(1))
@@ -343,7 +343,7 @@ def to_prometheus():
                 if _ingot_name != "error":
                     _data.append((_ingot_name, _ingot_qty))
 
-    # Workaround for bricks   
+    # Workaround for bricks
     if FindTypeEx(Types.INGOT, 0x04E8, CHEST):
         _brick, _qty = get_item_name(FindItem(), "Brick")
         if _brick != "error":
@@ -353,10 +353,10 @@ def to_prometheus():
     if FindType(Types.PICKAXE, CHEST):
         _data.append(("pickaxe", FindCount()))
 
-    # To empty file lulz    
+    # To empty file lulz
     open(FILE_NAME, 'w').close()
     # Now we can append some data...
-    with open(FILE_NAME, "a") as _to_exporter:        
+    with open(FILE_NAME, "a") as _to_exporter:
         for _set in _data:
             _ingot, _qty = _set
             _to_exporter.write(f"{_ingot}={_qty}\n")
@@ -370,23 +370,23 @@ def crash_rocks():
             WaitForTarget(2000)
             if TargetPresent():
                 WaitTargetObject(FindItem())
-                Wait(1000)                
+                Wait(1000)
 
 
 def mine():
     for _tile_data in find_tiles(TILE_SEARCH_RANGE):
-        _tile, _x, _y, _z = _tile_data      
+        _tile, _x, _y, _z = _tile_data
         if _tile in BAD_TILES:
-            continue  
+            continue
         while not Dead():
-            # Overload?     
+            # Overload?
             if Weight() >= MaxWeight() - 20:
             #if Weight() >= 200:
-                smelt()                                
+                smelt()
                 unload()
                 move_to(_x, _y)
 
-            # You can't mine so close to yourself 
+            # You can't mine so close to yourself
             if newMoveXY(_x, _y, True, 1, True):
                 if GetX(Self()) == _x and GetY(Self()) == _y:
                     newMoveXY(_x + 1, _y, True, 0, True)
@@ -404,7 +404,7 @@ def mine():
                         SetWarMode(False)
                 #
                 cancel_targets()
-                                
+
                 _started = dt.now()
                 UseObject(ObjAtLayer(RhandLayer()))
                 WaitForTarget(2000)
@@ -412,13 +412,13 @@ def mine():
                     WaitTargetTile(_tile, _x, _y, _z)
                     WaitJournalLine(_started, "|".join(
                         SKIP_TILE_MESSAGES + NEXT_TRY_MESSAGES), 50000)
-                    
+
                     # If we got message like "Try mining elsewhere" - we should skip that
                     # tiles in future
                     if FoundedParamID() == 3:
                         if not _tile in BAD_TILES:
                             BAD_TILES.append(_tile)
-                            print(BAD_TILES)                    
+                            print(BAD_TILES)
 
                 if InJournalBetweenTimes("|".join(SKIP_TILE_MESSAGES), _started, dt.now()) > 0:
                     break
@@ -456,13 +456,13 @@ if __name__ == "__main__":
         except RuntimeError as e:
             print(e)
             exit()
-    
+
     # Clean bag from ore, restock, etc
     smelt()
-    unload()    
+    unload()
     # Now we can start infinite loop
-    while 1:            
+    while 1:
         for point in MINE_COORDS:
             point_x, point_y = point
-            move_to(point_x, point_y)        
+            move_to(point_x, point_y)
             mine()
